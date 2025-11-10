@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>new user</title>
+</head>
+<body>
+<form th:action="@{/admin/create}" th:object="${user}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <label>Name: </label>
+    <input type="hidden" th:field="*{id}"/>
+
+    <input type="text" th:field="*{name}"/>
+
+    <label>Email: </label>
+    <input type="email" th:field="*{email}"/>
+
+    <label>Password: </label>
+    <input type="password" th:field="*{password}"/>
+
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <input type="submit" th:value="${user.id == null ? 'Create!' : 'Update!'}">
+</form>
+</body>
+</html>

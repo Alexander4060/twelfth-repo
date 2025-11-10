@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>List of users</title>
+</head>
+
+<body>
+<div th:each="user : ${users}">
+    <p>
+        ID: <span th:text="${user.id}"></span><br>
+        Name: <span th:text="${user.name}"></span><br>
+        Email: <span th:text="${user.email}"></span>
+    </p>
+
+    <form action="/admin/delete" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="id" th:value="${user.id}" />
+        <button type="submit">Delete user</button>
+    </form>
+
+    <form action="/admin/edit" method="get">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="id" th:value="${user.id}" />
+        <button type="submit">Edit user</button>
+    </form>
+
+    <form action="/admin/new" method="get">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="id" th:value="${user.id}" />
+        <button type="submit">Add New User</button>
+    </form>
+    <hr>
+</div>
+</body>
+
+</html>
