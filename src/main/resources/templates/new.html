@@ -8,18 +8,41 @@
 <form th:action="@{/admin/create}" th:object="${user}" method="post">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-    <label>Name: </label>
-    <input type="hidden" th:field="*{id}"/>
+    <input type="hidden" th:field="*{id}" th:value="${user.id}"/>
 
-    <input type="text" th:field="*{name}"/>
+    <label> Name: <br>
+        <input type="text" th:field="*{name}"/>
+    </label>
 
-    <label>Email: </label>
-    <input type="email" th:field="*{email}"/>
+    <br>
+    <br>
 
-    <label>Password: </label>
-    <input type="password" th:field="*{password}"/>
+    <label> Email: <br>
+        <input type="email" th:field="*{email}"/>
+    </label>
 
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <br>
+    <br>
+
+    <label> Password: <br>
+        <input type="password" th:field="*{password}"/>
+    </label>
+
+    <br>
+    <br>
+
+    <label> Roles: <br></label>
+        <div th:each="role : ${roles}">
+            <label>
+                <input type="checkbox" name = roles th:field="*{roles}" th:value="${role.id}"
+                th:checked="${user.roles != null and user.roles.contains(role)}"/>
+            </label>
+            <label th:text="${role.role}"></label>
+        </div>
+
+    <br>
+    <br>
+
     <input type="submit" th:value="${user.id == null ? 'Create!' : 'Update!'}">
 </form>
 </body>

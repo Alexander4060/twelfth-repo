@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = "users")
@@ -26,7 +27,7 @@ public class User implements UserDetails {
 
     @Column
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
     joinColumns = @JoinColumn(name = "user_id"),
@@ -34,6 +35,10 @@ public class User implements UserDetails {
     private Set<Role> roles =  new HashSet<>();
 
     public User() {}
+
+    public User(Set<Role> roles) {
+
+    }
 
     public Long getId() {
         return id;
@@ -70,6 +75,7 @@ public class User implements UserDetails {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

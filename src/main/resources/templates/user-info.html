@@ -5,10 +5,28 @@
     <title>Title</title>
 </head>
 <body>
-    <p>Name: <span th:text="${user.name}"></span></p>
-    <p>Email: <span th:text="${user.email}"></span></p>
-    <p>Roles: <span th:text="${user.roles}"></span></p>
-
+<table>
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.email}"></td>
+        <td>
+            <div th:each="role : ${user.roles}">
+                <span th:text="${role.role}"></span>
+            </div>
+        </td>
+    </tr>
+    </tbody>
+</table>
     <form th:action="@{/logout}" method="post">
         <button type="submit">Logout</button>
     </form>

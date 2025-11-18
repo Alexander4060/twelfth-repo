@@ -5,22 +5,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
     private final UserService userService;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, RoleRepository roleRepository) {
         this.userService = userService;
-    }
-
-    @GetMapping()
-    public String adminPage() {
-        return "admin";
+        this.roleRepository = roleRepository;
     }
 
     @GetMapping("/users")
@@ -30,11 +30,12 @@ public class AdminController {
     }
 
     @PostMapping("/create")
-    public String saveOrUpdateUser(@ModelAttribute("user") User user) {
-        if (user.getId() == null) {
-            userService.saveOrUpdateUser(user);
+    public String saveOrUpdateUser(@ModelAttribute("user") User user,
+                                   @RequestParam(value = "roles", required = false) List<Long> roleIds) {
+        if (user.getId() != null) {
+            userService.updateUserWithRoles(user, roleIds);
         } else {
-            userService.saveOrUpdateUser(user);
+            userService.saveUser(user, roleIds);
         }
         return "redirect:/admin/users";
     }
@@ -42,6 +43,7 @@ public class AdminController {
     @GetMapping("/new")
     public String getNewUserForm(Model model) {
         model.addAttribute("user", new User());
+        model.addAttribute("roles", roleRepository.findAll());
         return "new";
     }
 
@@ -52,8 +54,9 @@ public class AdminController {
     }
 
     @GetMapping("/edit")
-    public String getUserForUpdate(@RequestParam("id") long id, Model model) {
+    public String getUserForUpdate(@RequestParam("id") Long id, Model model) {
         model.addAttribute("user", userService.getUserById(id));
+        model.addAttribute("roles", roleRepository.findAll());
         return "new";
     }
 }
