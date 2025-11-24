@@ -41,49 +41,58 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void saveUser(User user, List<Long> roleIds) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         if (roleIds != null) {
             List<Role> roles = roleRepository.findAllById(roleIds);
-            userRepository.save(user);
+            user.setRoles(new HashSet<>(roles));
         }
+        userRepository.save(user);
     }
 
-        @Override
-        @Transactional
-        public void updateUserWithRoles (User user, List < Long > roleIds){
-            Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
-            user.setRoles(roles);
+    @Override
+    @Transactional
+    public void updateUserWithRoles (User user, List <Long> roleIds){
+        User existingUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            User existingUser = userRepository.findById(user.getId()).orElse(null);
+        existingUser.setName(user.getName());
+        existingUser.setEmail(user.getEmail());
 
-            if (existingUser != null) {
-                if (user.getPassword().equals(existingUser.getPassword())) {
-                    user.setPassword(existingUser.getPassword());
-                } else {
-                    user.setPassword(passwordEncoder.encode(user.getPassword()));
-                }
-            } else {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getPassword() != null && !user.getPassword().trim().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        if (roleIds != null) {
+            Set<Role> newRoles = new HashSet<>();
+            for (Long roleId : roleIds) {
+                Role role = roleRepository.findById(roleId)
+                        .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+                newRoles.add(role);
             }
-            userRepository.save(user);
+            existingUser.setRoles(newRoles);
         }
 
-        @Override
-        @Transactional
-        public void deleteUserById (Long id){
-            User user = userRepository.findById(id).orElseThrow(() ->
-                    new RuntimeException("User not found"));
-            user.getRoles().clear();
-            userRepository.save(user);
-            userRepository.delete(user);
-        }
-
-        @Override
-        @Transactional(readOnly = true)
-        public UserDetails loadUserByUsername (String email) throws UsernameNotFoundException {
-            User user = userRepository.findByEmailWithRoles(email);
-            if (user == null) {
-                throw new UsernameNotFoundException("User not found");
-            }
-            return user;
-        }
+        userRepository.save(existingUser);
     }
+
+    @Override
+    @Transactional
+    public void deleteUserById (Long id){
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("User not found"));
+        user.getRoles().clear();
+        userRepository.save(user);
+        userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername (String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmailWithRoles(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return user;
+    }
+}

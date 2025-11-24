@@ -1,6 +1,8 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +10,7 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -24,7 +27,9 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public String getUsers(Model model) {
+    public String getUsers(Model model, Authentication authentication) {
+        model.addAttribute("user", authentication.getPrincipal());
+        model.addAttribute("roles", authentication.getAuthorities());
         model.addAttribute("users", userService.getUsers());
         return "users";
     }
@@ -41,7 +46,8 @@ public class AdminController {
     }
 
     @GetMapping("/new")
-    public String getNewUserForm(Model model) {
+    public String getNewUserForm(Model model, Authentication authentication) {
+        model.addAttribute("currentUser", authentication.getPrincipal());
         model.addAttribute("user", new User());
         model.addAttribute("roles", roleRepository.findAll());
         return "new";
@@ -54,9 +60,17 @@ public class AdminController {
     }
 
     @GetMapping("/edit")
-    public String getUserForUpdate(@RequestParam("id") Long id, Model model) {
+    public String getUserForUpdate(@RequestParam("id") Long id, Model model, Authentication authentication) {
         model.addAttribute("user", userService.getUserById(id));
         model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("allRoles", authentication.getAuthorities());
         return "new";
+    }
+
+    @GetMapping("/user")
+    public String viewUser(Model model, Authentication authentication) {
+        model.addAttribute("user", authentication.getPrincipal());
+        model.addAttribute("roles", authentication.getAuthorities());
+        return "admin-user-profile";
     }
 }
