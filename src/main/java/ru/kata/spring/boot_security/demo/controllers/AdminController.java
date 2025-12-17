@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repositories.RoleRepository;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.security.Principal;
@@ -19,17 +20,19 @@ public class AdminController {
 
     private final UserService userService;
     private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     @Autowired
-    public AdminController(UserService userService, RoleRepository roleRepository) {
+    public AdminController(UserService userService, RoleRepository roleRepository, RoleService roleService) {
         this.userService = userService;
         this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @GetMapping("/users")
     public String getUsers(Model model, Authentication authentication) {
         model.addAttribute("user", authentication.getPrincipal());
-        model.addAttribute("roles", authentication.getAuthorities());
+        model.addAttribute("roles", roleRepository.findAll());
         model.addAttribute("users", userService.getUsers());
         return "users";
     }
@@ -67,10 +70,11 @@ public class AdminController {
         return "new";
     }
 
-    @GetMapping("/user")
-    public String viewUser(Model model, Authentication authentication) {
+    @GetMapping("/admin-user-profile")
+    public String getUserProfile(Model model, Authentication authentication) {
         model.addAttribute("user", authentication.getPrincipal());
-        model.addAttribute("roles", authentication.getAuthorities());
+        model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("allRoles", authentication.getAuthorities());
         return "admin-user-profile";
     }
 }
